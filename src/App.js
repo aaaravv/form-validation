@@ -13,6 +13,7 @@ function App() {
 		const { name, value } = e.target;
 		setFormValues({ ...formValues, [name]: value });
 		console.log(formValues);
+		console.log(e.target);
 	};
 
 	const handleOnSubmit = (e) => {
@@ -24,6 +25,7 @@ function App() {
 	const validateForm = (values) => {
 		const errors = {};
 		const emailRegex =
+			// eslint-disable-next-line
 			/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 		if (!values.username) {
 			errors.username = "Username is required";
@@ -43,16 +45,13 @@ function App() {
 		return errors;
 	};
 
-	const handleOnReset = () => {
-		setFormValues(initialValues);
-	};
-
 	useEffect(() => {
 		console.log(formErrors);
 		if (Object.keys(formErrors).length === 0 && isSubmit) {
 			console.log(formValues);
-			handleOnReset();
+			setFormValues(initialValues);
 		}
+		// eslint-disable-next-line
 	}, [formErrors]);
 
 	return (
@@ -60,12 +59,11 @@ function App() {
 			{Object.keys(formErrors).length === 0 && isSubmit ? (
 				<AlertMessage message="Sign in successfull" />
 			) : (
-				// <pre>{JSON.stringify(formValues, null, 2)}</pre>
-				""
+				<pre>{JSON.stringify(formValues, null, 3)}</pre>
 			)}
 			<div className="form_container">
 				<div className="title_container">
-					<h2>Responsive Registration Form</h2>
+					<h2>Registration Form</h2>
 				</div>
 				<div className="row clearfix">
 					<div>
@@ -83,7 +81,9 @@ function App() {
 											name="username"
 											placeholder="User Name"
 											value={formValues.username}
-											onChange={handleInputChange}
+											onChange={(e) =>
+												handleInputChange(e)
+											}
 										/>
 									</div>
 									<p>{formErrors.username}</p>
@@ -100,7 +100,7 @@ function App() {
 									name="email"
 									placeholder="Email"
 									value={formValues.email}
-									onChange={handleInputChange}
+									onChange={(e) => handleInputChange(e)}
 								/>
 							</div>
 							<p>{formErrors.email}</p>
@@ -115,7 +115,7 @@ function App() {
 									name="password"
 									placeholder="Password"
 									value={formValues.password}
-									onChange={handleInputChange}
+									onChange={(e) => handleInputChange(e)}
 								/>
 							</div>
 							<p>{formErrors.password}</p>
@@ -130,7 +130,7 @@ function App() {
 									name="password"
 									placeholder="Re-type Password"
 									value={formValues.password}
-									onChange={handleInputChange}
+									onChange={(e) => handleInputChange(e)}
 								/>
 							</div>
 							<p>{formErrors.password}</p>
