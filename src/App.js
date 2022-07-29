@@ -4,55 +4,79 @@ import "./assets/styles/form.css";
 import AlertMessage from "./components/AlertMessage";
 
 function App() {
-	const initialValues = { username: "", email: "", password: "" };
-	const [formValues, setFormValues] = useState(initialValues);
+	const [formValues, setFormValues] = useState({
+		username: "",
+		email: "",
+		password: "",
+		confirmPassword: "",
+	});
 	const [formErrors, setFormErrors] = useState({});
 	const [isSubmit, setIsSubmit] = useState(false);
-
-	const handleInputChange = (e) => {
-		const { name, value } = e.target;
-		setFormValues({ ...formValues, [name]: value });
-		console.log(formValues);
-		console.log(e.target);
-	};
+	const [inputType, setInputType] = useState("");
 
 	const handleOnSubmit = (e) => {
 		e.preventDefault();
-		setFormErrors(validateForm(formValues));
-		setIsSubmit(true);
+		if (Object.keys(formErrors).length === 0) {
+			setFormValues({
+				username: "",
+				email: "",
+				password: "",
+				confirmPassword: "",
+			});
+			setIsSubmit(true);
+		}
 	};
 
-	const validateForm = (values) => {
+	const validateForm = (values, type) => {
 		const errors = {};
+		const usernameRegex = /^[a-zA-Z]+$/;
 		const emailRegex =
 			// eslint-disable-next-line
 			/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-		if (!values.username) {
-			errors.username = "Username is required";
-		}
-		if (!values.password) {
-			errors.password = "Password is required";
-		} else if (values.password.length < 6) {
-			errors.password = "Password must be at least 6 characters";
-		} else if (values.password === values.username) {
-			errors.password = "Password must be different from username";
-		}
-		if (!values.email) {
-			errors.email = "Email is required";
-		} else if (!emailRegex.test(values.email)) {
-			errors.email = "Email is not valid";
-		}
+		const passwordRegex =
+			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+		if (type === "username")
+			if (values.username.length < 3 || values.username.length > 20)
+				errors.username =
+					"Username must be between 3 and 20 characters";
+			else if (!values.username) errors.username = "Username is required";
+
+		if (type === "username")
+			if (!usernameRegex.test(values.username))
+				errors.username = "Username must be alphabetic";
+
+		if (type === "password")
+			if (values.password.length < 6)
+				errors.password = "Password must be at least 6 characters";
+			else if (values.password === values.username)
+				errors.password = "Password must be different from username";
+			else if (!passwordRegex.test(values.password))
+				errors.password =
+					"Password must contain at least one number, one uppercase and one special character";
+			else if (!values.password) errors.password = "Password is required";
+
+		if (values.password !== values.confirmPassword)
+			errors.confirmPassword = "Password must be same as above";
+
+		if (type === "email")
+			if (!emailRegex.test(values.email))
+				errors.email = "Email must be like username@domain.com";
+			else if (!values.email) errors.email = "Email is required";
+
 		return errors;
 	};
 
+	const handleInputChange = (e) => {
+		const { name, value } = e.target;
+		setInputType(name);
+		setFormValues({ ...formValues, [name]: value });
+	};
+
 	useEffect(() => {
-		console.log(formErrors);
-		if (Object.keys(formErrors).length === 0 && isSubmit) {
-			console.log(formValues);
-			setFormValues(initialValues);
-		}
+		setFormErrors(validateForm(formValues, inputType));
 		// eslint-disable-next-line
-	}, [formErrors]);
+	}, [formValues, formErrors, isSubmit]);
 
 	return (
 		<div className="form_wrapper">
@@ -127,13 +151,13 @@ function App() {
 								</span>
 								<input
 									type="password"
-									name="password"
+									name="confirmPassword"
 									placeholder="Re-type Password"
-									value={formValues.password}
+									value={formValues.confirmPassword}
 									onChange={(e) => handleInputChange(e)}
 								/>
 							</div>
-							<p>{formErrors.password}</p>
+							<p>{formErrors.confirmPassword}</p>
 							<input
 								className="button"
 								type="submit"
